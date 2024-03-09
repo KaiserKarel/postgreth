@@ -1,0 +1,5 @@
+comment = 'postgreth:  Created by pgrx'
+default_version = '@CARGO_VERSION@'
+module_pathname = '$libdir/postgreth'
+relocatable = false
+superuser = true
