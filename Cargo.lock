@@ -67,11 +67,13 @@ dependencies = [
 [[package]]
 name = "alloy-dyn-parser"
 version = "0.1.0"
-source = "git+https://github.com/kaiserkarel/alloy-dyn-parser#134d26d4ed16eaa18f944ffef69bf5e50075a62c"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d58ed67375bb229773d28740c168f0afd65423ebd11e6ecc7df7848c6f9bc4a5"
 dependencies = [
  "alloy-dyn-abi",
  "alloy-json-abi",
  "alloy-primitives",
+ "alloy-sol-types",
  "base64 0.22.0",
  "ethers",
  "serde",
