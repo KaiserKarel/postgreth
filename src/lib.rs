@@ -30,8 +30,8 @@ mod tests {
 
     #[pg_test]
     fn test_hello_postgreth() {
-        let abi = include_str!("../../testdata/erc20.json");
-        let log: &str = include_str!("../../testdata/log.json");
+        let abi = include_str!("../testdata/erc20.json");
+        let log: &str = include_str!("../testdata/log.json");
         let expected = pgrx::JsonB(serde_json::from_str("{\"name\":\"Transfer\",\"data\":{\"from\":\"0x8a02604a33da84F492d161c8C9fc5068f368e352\",\"to\":\"0xA232a12C07681e067B8Da83bFC92A55DA831aD0D\",\"value\":\"100000000000000000000\"}}").unwrap());
         assert_eq!(expected.0, crate::parsing::log_to_jsonb(&abi, &log).0);
     }
