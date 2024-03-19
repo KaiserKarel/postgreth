@@ -11,7 +11,7 @@ pub mod parsing {
     ///
     /// # Panics
     /// - On any internal error encountered. It is expected that `pgrx` gracefully handles these.
-    #[pg_extern]
+    #[pg_extern(immutable, parallel_safe)]
     pub fn log_to_jsonb(input: &str, value: &str) -> pgrx::JsonB {
         let abi: JsonAbi = serde_json::from_str(input).expect("deserializing json abi failed");
         let parser = alloy_dyn_parser::Parser::new(&abi);
