@@ -58,6 +58,7 @@ dependencies = [
  "alloy-sol-type-parser",
  "alloy-sol-types",
  "const-hex",
+ "derive_more",
  "itoa",
  "serde",
  "serde_json",
@@ -66,14 +67,13 @@ dependencies = [
 
 [[package]]
 name = "alloy-dyn-parser"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d58ed67375bb229773d28740c168f0afd65423ebd11e6ecc7df7848c6f9bc4a5"
+checksum = "97c0588cd9eb0f65da45a13e33998421466066612362139016bc96eb555d42d1"
 dependencies = [
  "alloy-dyn-abi",
  "alloy-json-abi",
  "alloy-primitives",
- "alloy-sol-types",
  "base64 0.22.0",
  "ethers",
  "serde",
