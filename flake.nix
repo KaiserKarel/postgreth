@@ -14,7 +14,7 @@
     treefmt-nix.url = "github:numtide/treefmt-nix";
 
   };
-  outputs = inputs@{ self, nixpkgs, rust-overlay, flake-parts, ... }:
+  outputs = inputs@{ self, nixpkgs, crane, flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [
         inputs.treefmt-nix.flakeModule
@@ -34,19 +34,30 @@
       };
       systems =
         [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
-      perSystem = { self', system, lib, config, pkgs, ... }: {
-        packages = {
-          postgreth_14 = self.lib.buildPostgrethExtension pkgs pkgs.postgresql_14;
-          postgreth_15 = self.lib.buildPostgrethExtension pkgs pkgs.postgresql_15;
-          postgreth_16 = self.lib.buildPostgrethExtension pkgs pkgs.postgresql_16;
-        };
-        treefmt.config = {
-          projectRootFile = "flake.nix";
-          programs = {
-            nixpkgs-fmt.enable = true;
-            rustfmt.enable = true;
+      perSystem = { self', system, lib, config, pkgs, ... }:
+        let
+          craneLib = crane.lib.${system};
+        in
+        {
+
+          packages = rec {
+            default = postgreth_16;
+            postgreth_14 = self.lib.buildPostgrethExtension pkgs pkgs.postgresql_14;
+            postgreth_15 = self.lib.buildPostgrethExtension pkgs pkgs.postgresql_15;
+            postgreth_16 = self.lib.buildPostgrethExtension pkgs pkgs.postgresql_16;
+          };
+          treefmt.config = {
+            projectRootFile = "flake.nix";
+            programs = {
+              nixpkgs-fmt.enable = true;
+              rustfmt.enable = true;
+            };
+          };
+          devShells.default = craneLib.devShell {
+            checks = self.checks.${system};
+            packages = [
+            ];
           };
         };
-      };
     };
 }
