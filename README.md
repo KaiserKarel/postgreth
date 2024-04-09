@@ -8,6 +8,13 @@ Postgreth is a Postgresql extension enabling ethabi datatypes inside of SQL.
 - Used internally to parse 300GB worth of events.
 - Will be production ready soon (tm).
 
+## Features
+
+Postgreth is currently focussed around operating on different Ethereum datatypes. We support:
+
+- Bloom filters
+- Log decoding
+
 ## Usage
 
 After installing the extension, run:
@@ -16,7 +23,7 @@ After installing the extension, run:
 CREATE extension postgreth
 ```
 
-Now parsing of ethabi becomes available:
+Now parsing of ethabi and other functions become available:
 
 ```sql
 /*

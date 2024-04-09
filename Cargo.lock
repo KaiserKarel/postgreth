@@ -54,7 +54,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2919acdad13336bc5dc26b636cdd6892c2f27fb0d4a58320a00c2713cf6a4e9a"
 dependencies = [
  "alloy-json-abi",
- "alloy-primitives",
+ "alloy-primitives 0.6.4",
  "alloy-sol-type-parser",
  "alloy-sol-types",
  "const-hex",
@@ -73,7 +73,7 @@ checksum = "97c0588cd9eb0f65da45a13e33998421466066612362139016bc96eb555d42d1"
 dependencies = [
  "alloy-dyn-abi",
  "alloy-json-abi",
- "alloy-primitives",
+ "alloy-primitives 0.6.4",
  "base64 0.22.0",
  "ethers",
  "serde",
@@ -87,7 +87,7 @@ version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "24ed0f2a6c3a1c947b4508522a53a190dba8f94dcd4e3e1a5af945a498e78f2f"
 dependencies = [
- "alloy-primitives",
+ "alloy-primitives 0.6.4",
  "alloy-sol-type-parser",
  "serde",
  "serde_json",
@@ -98,6 +98,28 @@ name = "alloy-primitives"
 version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "600d34d8de81e23b6d909c094e23b3d357e01ca36b78a8c5424c501eedbe86f0"
+dependencies = [
+ "alloy-rlp",
+ "bytes",
+ "cfg-if",
+ "const-hex",
+ "derive_more",
+ "hex-literal",
+ "itoa",
+ "k256",
+ "keccak-asm",
+ "proptest",
+ "rand",
+ "ruint",
+ "serde",
+ "tiny-keccak",
+]
+
+[[package]]
+name = "alloy-primitives"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "99bbad0a6b588ef4aec1b5ddbbfdacd9ef04e00b979617765b03174318ee1f3a"
 dependencies = [
  "alloy-rlp",
  "bytes",
@@ -158,7 +180,7 @@ version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ad09ec5853fa700d12d778ad224dcdec636af424d29fad84fb9a2f16a5b0ef09"
 dependencies = [
- "alloy-primitives",
+ "alloy-primitives 0.6.4",
  "alloy-sol-macro",
  "const-hex",
  "serde",
@@ -2933,7 +2955,7 @@ dependencies = [
  "alloy-dyn-abi",
  "alloy-dyn-parser",
  "alloy-json-abi",
- "alloy-primitives",
+ "alloy-primitives 0.7.0",
  "alloy-sol-types",
  "criterion",
  "ethers",

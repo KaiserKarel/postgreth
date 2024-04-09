@@ -55,8 +55,26 @@
           };
           devShells.default = craneLib.devShell {
             checks = self.checks.${system};
-            packages = [
+            inputsFrom = with pkgs; [
+              postgresql_12
+              postgresql_13
+              postgresql_14
+              postgresql_15
+              postgresql_16
             ];
+            packages = with pkgs; [
+              cargo-pgrx
+              postgresql
+              libiconv
+              pkg-config
+            ];
+            LIBCLANG_PATH = "${pkgs.llvmPackages.libclang.lib}/lib";
+            PGRX_PG_SYS_SKIP_BINDING_REWRITE = "1";
+            BINDGEN_EXTRA_CLANG_ARGS = [
+              ''-I"${pkgs.llvmPackages.libclang.lib}/lib/clang/${pkgs.llvmPackages.libclang.version}/include"''
+            ] ++ (if pkgs.stdenv.isLinux then [
+              "-I ${pkgs.glibc.dev}/include"
+            ] else [ ]);
           };
         };
     };

@@ -2,6 +2,82 @@ use pgrx::prelude::*;
 
 pgrx::pg_module_magic!();
 
+pub mod types {
+    use pgrx::prelude::*;
+    use serde::{Deserialize, Serialize};
+
+    #[derive(Serialize, Deserialize, PostgresType)]
+    #[repr(transparent)]
+    pub struct Bloom(pub alloy_primitives::FixedBytes<256>);
+
+    impl Bloom {
+        pub fn into_filter(self) -> alloy_primitives::Bloom {
+            alloy_primitives::Bloom::from(self.0)
+        }
+    }
+
+    #[pg_extern]
+    fn covers(left: Bloom, right: Bloom) -> bool {
+        left.into_filter().covers(&right.into_filter())
+    }
+
+    #[derive(Serialize, Deserialize, PostgresType)]
+    #[repr(transparent)]
+    pub struct Address(pub alloy_primitives::FixedBytes<20>);
+
+    impl Address {
+        fn into_address(self) -> alloy_primitives::Address {
+            alloy_primitives::Address::from(self.0)
+        }
+    }
+
+    #[derive(Serialize, Deserialize, PostgresType)]
+    #[repr(transparent)]
+    pub struct B256(pub alloy_primitives::aliases::B256);
+
+    #[pg_extern]
+    pub fn contains_input(bloom: Bloom, input: &[u8]) -> bool {
+        bloom
+            .into_filter()
+            .contains_input(alloy_primitives::BloomInput::Raw(input))
+    }
+
+    #[pg_extern]
+    pub fn contains_input_hashed(bloom: Bloom, hash: &[u8]) -> bool {
+        bloom
+            .into_filter()
+            .contains_input(alloy_primitives::BloomInput::Hash(
+                hash.try_into()
+                    .expect("hash did not have the correct length"),
+            ))
+    }
+
+    #[pg_extern]
+    pub fn m3_2048(bloom: Bloom, bytes: &[u8]) -> Bloom {
+        let mut filter = bloom.into_filter();
+        filter.m3_2048(bytes);
+        Bloom(filter.0)
+    }
+
+    #[pg_extern]
+    pub fn m3_2048_hashed(bloom: Bloom, hash: &[u8]) -> Bloom {
+        let mut filter = bloom.into_filter();
+        filter.m3_2048_hashed(
+            hash.try_into()
+                .expect("hash did not have the correct length"),
+        );
+        Bloom(filter.0)
+    }
+
+    #[pg_extern]
+    fn contains_raw_log(bloom: Bloom, address: Address, topics: Vec<B256>) -> bool {
+        let topics: Vec<_> = topics.into_iter().map(|t| t.0).collect();
+        bloom
+            .into_filter()
+            .contains_raw_log(address.into_address(), &topics)
+    }
+}
+
 pub mod parsing {
     use alloy_json_abi::JsonAbi;
     use ethers::types::Log;
