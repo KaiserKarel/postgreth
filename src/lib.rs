@@ -97,6 +97,40 @@ pub mod parsing {
             .expect("could not parse log into keyed data");
         pgrx::JsonB(serde_json::to_value(result).expect("could not convert keyed events to json"))
     }
+
+    /// Parse any ethabi encoded object by providing the solidity type.
+    ///
+    /// ```sql
+    /// SELECT item_to_jsonb('(bytes,bytes,(string,uint128)[])', '...'::bytea, true)
+    /// ```
+    ///
+    /// The final argument, `prepend_magic_bytes`, is needed when decoding tuples.
+    ///
+    /// # Panics
+    /// - When the provided `item` is invalid.
+    /// - When the solidity type cannot decode the `value`.
+    ///
+    /// # Common errors
+    /// - If `Err` value: SolTypes(Overrun)` is thrown, set prepend_magic_bytes to `true`
+    #[pg_extern(immutable, parallel_safe)]
+    pub fn item_to_jsonb(item: &str, value: &[u8], prepend_magic_bytes: bool) -> pgrx::JsonB {
+        use alloy_dyn_abi::DynSolType;
+
+        let mut v = vec![
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 32,
+        ];
+
+        let value = if prepend_magic_bytes {
+            v.extend(value);
+            &v
+        } else {
+            value
+        };
+        let my_type: DynSolType = item.parse().unwrap();
+        let decoded = my_type.abi_decode(value).unwrap();
+        pgrx::JsonB(alloy_dyn_parser::dyn_sol_to_json(decoded))
+    }
 }
 
 #[cfg(any(test, feature = "pg_test"))]
@@ -110,6 +144,20 @@ mod tests {
         let log: &str = include_str!("../testdata/log.json");
         let expected = pgrx::JsonB(serde_json::from_str("{\"name\":\"Transfer\",\"data\":{\"from\":\"0x8a02604a33da84F492d161c8C9fc5068f368e352\",\"to\":\"0xA232a12C07681e067B8Da83bFC92A55DA831aD0D\",\"value\":\"100000000000000000000\"}}").expect("parsing json literal should work"));
         assert_eq!(expected.0, crate::parsing::log_to_jsonb(&abi, &log).0);
+    }
+
+    #[pg_test]
+    fn test_item_to_jsonb() {
+        use base64::prelude::*;
+        use serde_json::Value;
+
+        let item = crate::parsing::item_to_jsonb(
+            "(bytes,bytes,(string,uint128)[])",
+            &BASE64_STANDARD.decode("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSEeLN+mD9SDby119Oq2CdrgmMavQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAUqDOwPY7RIoxHkcv6sis+1XlUQp8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAqMHg3Nzk4NzdhN2IwZDllODYwMzE2OWRkYmQ3ODM2ZTQ3OGI0NjI0Nzg5AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==").unwrap(),
+            true
+        );
+        let expected: Value = serde_json::from_str(r#"["hHizfpg/Ug28tdfTqtgna4JjGr0=", "qDOwPY7RIoxHkcv6sis+1XlUQp8=", [["0x779877a7b0d9e8603169ddbd7836e478b4624789", "2"]]]"#).unwrap();
+        assert_eq!(item.0, expected)
     }
 }
 
